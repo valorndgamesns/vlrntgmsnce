@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Gamesense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #ece8e1; font-family: sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; }
+        .glass-btn { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; transition: 0.3s; }
+        .glass-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
+        .correct { background: rgba(0, 255, 170, 0.2) !important; border-color: #00ffaa !important; color: #00ffaa !important; }
+        .wrong { background: rgba(255, 70, 85, 0.2) !important; border-color: #ff4655 !important; color: #ff4655 !important; }
+        .hidden-screen { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="flex flex-col md:flex-row items-center justify-center gap-8 w-full max-w-5xl">
+        
+        <!-- Left Side: Image -->
+        <div class="hidden md:block w-1/3">
+            <img src="https://liquipedia.net/commons/images/thumb/5/5c/Omen_Artwork.png/900px-Omen_Artwork.png" alt="Omen Artwork" class="w-full h-auto rounded-3xl opacity-90 border border-white/10 shadow-2xl">
+        </div>
+
+        <!-- Right Side: Quiz Container -->
+        <div id="app-container" class="w-full md:w-2/3 glass p-10 md:p-16">
+            <div id="landing-screen" class="text-center">
+                <h1 class="text-4xl font-bold uppercase tracking-tighter mb-2 text-white">
+                    TRAIN YOUR 
+                    <a href="https://playvalorant.com/" target="_blank" class="text-[#FF4655] hover:underline">VALORANT</a> 
+                    GAMESENSE
+                </h1>
+                <p class="mb-10 opacity-70">In-Game scenarios to train your gamesense.</p>
+                <button onclick="startTest()" class="glass-btn px-12 py-6 text-xl font-bold hover:scale-105 transition-transform">START QUIZ</button>
+            </div>
+
+            <div id="quiz-screen" class="hidden-screen">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="text-xs uppercase opacity-50 tracking-widest" id="progress">Question 1/10</div>
+                    <div class="text-xs font-bold" id="score-tracker">Score: 0</div>
+                </div>
+                <h2 id="q-text" class="text-xl font-medium mb-8 leading-snug"></h2>
+                <div id="options" class="grid gap-3"></div>
+                
+                <div id="feedback" class="hidden mt-8 p-6 glass border-l-4">
+                    <h4 id="f-title" class="font-bold text-lg mb-2 uppercase"></h4>
+                    <div id="correction-box" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <p class="text-xs text-red-400 uppercase font-bold">Correct Option Was:</p>
+                        <p id="correct-ans-text" class="text-white font-medium"></p>
+                    </div>
+                    <p id="f-body" class="opacity-80 text-sm italic"></p>
+                    <button onclick="next()" class="mt-6 w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200">Next Question</button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden-screen text-center">
+                <h1 class="text-6xl font-bold mb-4">Quiz COMPLETE</h1>
+                <p id="final-score" class="text-2xl mb-8 opacity-70"></p>
+                <button onclick="location.reload()" class="glass-btn px-10 py-4">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB = [
+            {q: "What defines 'High-Level Game Sense'?", o: ["Relying on superior mechanical reaction times to win duels", "Predicting enemy tendencies based on map state and resource allocation", "Consistently lurking to catch enemies off-guard", "Prioritizing high crosshair placement to clear angles efficiently"], c: 1, b: "Aim-heavy styles are reactive. High-level sense is proactive—you play the map state and player tendencies, not just what's in front of your crosshair."},
+            {q: "Why is re-clearing areas in the mid-round vital?", o: ["To maximize the efficiency of your remaining utility", "To eliminate blind spots created by rotation timings and elapsed time", "To bait out enemy utility cooldowns before an execute", "To reset your team's positioning for a faster entry"], c: 1, b: "An area cleared 30 seconds ago is an area cleared in the past. Enemies can rotate or push into spots you already checked. Fresh info prevents playing on outdated assumptions."},
+            {q: "How does controlling one part of the map help in the late round?", o: ["It forces attackers into a predictable funnel, restricting their execute options", "It creates a wider surface area for the attackers to manage", "It allows for a faster rotation across the map if the bomb site changes", "It forces attackers to waste utility to regain map presence"], c: 0, b: "By aggressively taking space, you limit the enemy's paths. This forces them into a 'funnel' where their movement becomes predictable and easy to punish."},
+            {q: "When attackers take space and then slow down, what does the defender need to prioritize?", o: ["Pushing for early exit frags to get a man advantage", "Tracking rotation timings to identify if it's a fake or a setup", "Saving utility for the inevitable retake scenario", "Holding spawn to prevent a potential lurk"], c: 1, b: "That pause is a critical tactical window. It is almost always a read on your rotation. If they aren't pushing, they are waiting for you to make the mistake of leaving your site."},
+            {q: "How should previous rounds influence your current round calls?", o: ["Ignore past rounds to prevent bias in your decision making", "Repeat what failed to test if it was a fluke", "Identify patterns and adapt your strategy based on past enemy habits", "Only change your strategy if the previous round was a loss"], c: 2, b: "Teams are creatures of habit. They will often double down on what works or pivot sharply from what failed. Use that pattern recognition to predict the shift."},
+            {q: "What is the primary goal of using early-round utility?", o: ["To secure early kill trades in main chokepoints", "To create noise and bait out defensive setups", "To set the board by gathering info for calculated decisions", "To deny the enemy team any map control at all"], c: 2, b: "Utility in the early round is currency. Don't spend it for noise. Spend it to secure the info you need to build your round plan."},
+            {q: "Why is proactive decision-making superior to reactive play?", o: ["It simplifies the round and reduces IGL workload", "It creates advantageous fight scenarios by dictating the pace", "It allows players to conserve utility for the late round", "It removes the need for detailed team communication"], c: 1, b: "If you are reactive, you are letting the enemy choose the engagement terms. Proactive play forces the enemy to play *your* game, leading to advantageous fight conditions."},
+            {q: "What data points should you use to estimate enemy position?", o: ["Visual contact only to ensure 100% accuracy", "Utility usage, sound cues, minimap indicators, and timing", "Minimap indicators are sufficient for mid-round reads", "Guessing based on the enemy team's typical playstyle"], c: 1, b: "Information gathering is holistic. A single ping or a stray sound isn't enough; you need to synthesize everything to build a map-wide picture."},
+            {q: "When an attacker strategy fails badly, what do teams usually do?", o: ["Attempt to brute force the same strategy with better aim", "Avoid the failed tactic and adapt to a new approach", "Slow down the round to gain composure", "Rotate to a different map sector immediately"], c: 1, b: "Teams will rarely repeat a failed execution path in the very next round. They will either pivot to a different site or adjust the pace/utility of the existing one."},
+            {q: "What is the ultimate strategic advantage of 'Game Sense'?", o: ["Consistent high-kill games for the entry fragger", "Turning theoretically fair fights into lopsided advantages", "Reducing the pressure on the Controller to provide smokes", "Winning more rounds via raw team coordination"], c: 1, b: "Game sense is a force multiplier. It takes a fair, 50/50 aim duel and turns it into an engagement where you have the positional, utility, and timing advantage."}
+        ];
+
+        let idx = 0, score = 0;
+
+        function startTest() {
+            document.getElementById('landing-screen').classList.add('hidden-screen');
+            document.getElementById('quiz-screen').classList.remove('hidden-screen');
+            render();
+        }
+
+        function render() {
+            const q = DB[idx];
+            document.getElementById('progress').innerText = `Question ${idx + 1}/10`;
+            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('feedback').classList.add('hidden');
+            const container = document.getElementById('options'); container.innerHTML = '';
+            
+            q.o.forEach((o, i) => {
+                const b = document.createElement('button');
+                b.className = 'glass-btn p-4 text-left w-full hover:bg-white/10';
+                b.innerText = o;
+                b.onclick = () => {
+                    const corr = i === q.c;
+                    if(corr) score++;
+                    document.getElementById('score-tracker').innerText = `Score: ${score}`;
+                    
+                    Array.from(container.children).forEach((btn, index) => {
+                        btn.disabled = true;
+                        if(index === q.c) btn.classList.add('correct');
+                        else if(index === i && !corr) btn.classList.add('wrong');
+                    });
+
+                    const f = document.getElementById('feedback');
+                    const corBox = document.getElementById('correction-box');
+                    
+                    f.classList.remove('hidden', 'border-[#00ffaa]', 'border-[#ff4655]');
+                    f.classList.add(corr ? 'border-[#00ffaa]' : 'border-[#ff4655]');
+                    
+                    document.getElementById('f-title').innerText = corr ? "W" : "L";
+                    document.getElementById('f-body').innerText = q.b;
+                    
+                    if(!corr) {
+                        corBox.classList.remove('hidden');
+                        document.getElementById('correct-ans-text').innerText = q.o[q.c];
+                    } else {
+                        corBox.classList.add('hidden');
+                    }
+                };
+                container.appendChild(b);
+            });
+        }
+
+        function next() {
+            idx++;
+            if(idx < DB.length) render();
+            else {
+                document.getElementById('quiz-screen').classList.add('hidden-screen');
+                document.getElementById('result-screen').classList.remove('hidden-screen');
+                document.getElementById('final-score').innerText = `You finished with ${score}/10 correct.`;
+            }
+        }
+    </script>
+</body>
+</html>
