@@ -17,44 +17,40 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
 
-       
+    <div id="app-container" class="w-full max-w-3xl glass p-10 md:p-16">
+        <div id="landing-screen" class="text-center">
+            <h1 class="text-4xl font-bold uppercase tracking-tighter mb-2 text-white">
+                TRAIN YOUR 
+                <a href="https://playvalorant.com/" target="_blank" class="text-[#FF4655] hover:underline">VALORANT</a> 
+                GAMESENSE
+            </h1>
+            <p class="mb-10 opacity-70">In-Game scenarios to train your gamesense.</p>
+            <button onclick="startTest()" class="glass-btn px-12 py-6 text-xl font-bold hover:scale-105 transition-transform">START QUIZ</button>
+        </div>
 
-        <!-- Right Side: Quiz Container -->
-        <div id="app-container" class="w-full md:w-2/3 glass p-10 md:p-16">
-            <div id="landing-screen" class="text-center">
-                <h1 class="text-4xl font-bold uppercase tracking-tighter mb-2 text-white">
-                    TRAIN YOUR 
-                    <a href="https://playvalorant.com/" target="_blank" class="text-[#FF4655] hover:underline">VALORANT</a> 
-                    GAMESENSE
-                </h1>
-                <p class="mb-10 opacity-70">In-Game scenarios to train your gamesense.</p>
-                <button onclick="startTest()" class="glass-btn px-12 py-6 text-xl font-bold hover:scale-105 transition-transform">START QUIZ</button>
+        <div id="quiz-screen" class="hidden-screen">
+            <div class="flex justify-between items-center mb-6">
+                <div class="text-xs uppercase opacity-50 tracking-widest" id="progress">Question 1/10</div>
+                <div class="text-xs font-bold" id="score-tracker">Score: 0</div>
             </div>
-
-            <div id="quiz-screen" class="hidden-screen">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="text-xs uppercase opacity-50 tracking-widest" id="progress">Question 1/10</div>
-                    <div class="text-xs font-bold" id="score-tracker">Score: 0</div>
+            <h2 id="q-text" class="text-xl font-medium mb-8 leading-snug"></h2>
+            <div id="options" class="grid gap-3"></div>
+            
+            <div id="feedback" class="hidden mt-8 p-6 glass border-l-4">
+                <h4 id="f-title" class="font-bold text-lg mb-2 uppercase"></h4>
+                <div id="correction-box" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p class="text-xs text-red-400 uppercase font-bold">Correct Option Was:</p>
+                    <p id="correct-ans-text" class="text-white font-medium"></p>
                 </div>
-                <h2 id="q-text" class="text-xl font-medium mb-8 leading-snug"></h2>
-                <div id="options" class="grid gap-3"></div>
-                
-                <div id="feedback" class="hidden mt-8 p-6 glass border-l-4">
-                    <h4 id="f-title" class="font-bold text-lg mb-2 uppercase"></h4>
-                    <div id="correction-box" class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                        <p class="text-xs text-red-400 uppercase font-bold">Correct Option Was:</p>
-                        <p id="correct-ans-text" class="text-white font-medium"></p>
-                    </div>
-                    <p id="f-body" class="opacity-80 text-sm italic"></p>
-                    <button onclick="next()" class="mt-6 w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200">Next Question</button>
-                </div>
+                <p id="f-body" class="opacity-80 text-sm italic"></p>
+                <button onclick="next()" class="mt-6 w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200">Next Question</button>
             </div>
+        </div>
 
-            <div id="result-screen" class="hidden-screen text-center">
-                <h1 class="text-6xl font-bold mb-4">Quiz COMPLETE</h1>
-                <p id="final-score" class="text-2xl mb-8 opacity-70"></p>
-                <button onclick="location.reload()" class="glass-btn px-10 py-4">Restart Quiz</button>
-            </div>
+        <div id="result-screen" class="hidden-screen text-center">
+            <h1 class="text-6xl font-bold mb-4">Quiz COMPLETE</h1>
+            <p id="final-score" class="text-2xl mb-8 opacity-70"></p>
+            <button onclick="location.reload()" class="glass-btn px-10 py-4">Restart Quiz</button>
         </div>
     </div>
 
